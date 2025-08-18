@@ -58,7 +58,6 @@ class PlaceServiceTest {
         verify(repository, atLeastOnce()).findById(anyLong());
     }
 
-
     @Test
     void whenFindByIdThenReturnEmpty() {
         when(repository.findById(1L)).thenReturn(Optional.empty());
@@ -109,5 +108,30 @@ class PlaceServiceTest {
         assertEquals(place.getCity(), edited.getCity());
         assertEquals(place.getCreatedAt(), edited.getCreatedAt());
         assertNotNull(edited.getUpdatedAt());
+    }
+
+    @Test
+    void whenFindAllOk() {
+        when(repository.findAll()).thenReturn(Collections.singletonList(place));
+
+        List<Place> places = service.findAll();
+
+        assertEquals(1, places.size());
+        assertEquals(Place.class, places.get(0).getClass());
+        assertEquals(place.getName(), places.get(0).getName());
+        assertEquals(place.getSlug(), places.get(0).getSlug());
+        assertEquals(place.getCity(), places.get(0).getCity());
+        assertEquals(place.getState(), places.get(0).getState());
+        verify(repository, atLeastOnce()).findAll();
+    }
+
+    @Test
+    void whenFindAllNotFound() {
+        when(repository.findAll()).thenReturn(Collections.emptyList());
+
+        List<Place> places = service.findAll();
+
+        assertEquals(0, places.size());
+        verify(repository, atLeastOnce()).findAll();
     }
 }
