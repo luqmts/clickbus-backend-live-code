@@ -9,21 +9,16 @@ import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @Api("places")
 @RestController
 @RequestMapping("places")
 public class PlaceController {
-
+    @Autowired
     private PlaceService service;
 
     @PostMapping
@@ -34,19 +29,23 @@ public class PlaceController {
     @GetMapping("{id}")
     public ResponseEntity findById(@PathVariable Long id) {
         return service.findById(id)
-                      .map(place -> ResponseEntity.ok(place.convertToDTO()))
-                      .orElseThrow(() -> new PlaceNotFoundException(HttpStatus.NOT_FOUND));
+          .map(place -> ResponseEntity.ok(place.convertToDTO()))
+          .orElseThrow(() -> new PlaceNotFoundException(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping
-    public ResponseEntity findAll() {
-        Iterable<PlaceDTO> places = PlaceDTO.convertToList(service.findAll());
-        return ResponseEntity.ok(places);
+    public ResponseEntity findAll(@RequestParam(required = false) String name) {
+        if (name == null) return ResponseEntity.ok(PlaceDTO.convertToList(service.findAll()));
+
+        List<Place> places = service.findByName(name);
+        if (places.isEmpty()) throw new PlaceNotFoundException(HttpStatus.NOT_FOUND);
+
+        return ResponseEntity.ok(PlaceDTO.convertToList(places));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity alter(@PathVariable Long id, @RequestBody @Valid PlaceDTO placeDTO) {
-        Place place = service.findById(id).orElseThrow(null);
+        Place place = service.findById(id).orElseThrow(() -> new PlaceNotFoundException(HttpStatus.NOT_FOUND));
         return new ResponseEntity(service.alter(place, placeDTO).convertToDTO(), HttpStatus.OK);
     }
 }
