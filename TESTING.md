@@ -79,6 +79,8 @@ como pré-requisito geral, o projeto foi iniciado com o comando ```mvn spring-bo
 **Resultado obtido**
 - [OK] Retornado corretamente.
 
+---
+
 ## Cenário 8: Erro 404 deve ser retornado caso não haja item associado com o id informado
 **Passos necessários**
 1. Preencher o Body com um JSON válido contendo name, slug, city e state;
